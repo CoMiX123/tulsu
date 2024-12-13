@@ -14,7 +14,7 @@ chmod +x generate_number.py
 ```
 ./generate_number.py | ./calculate_ratio.py 2>> errors.txt | ./calculate_sqrt.py 2>> errors.txt
 ```
-#Лабораторная работа №2
+# Лабораторная работа №2
 ## Использование
 Перейдите в каталог labrab2:
 ```
