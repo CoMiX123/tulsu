@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import sys
 import os
-import signal
 
 # Функция для проверки имени
 class ValidationError(Exception):
@@ -19,8 +18,6 @@ def greet(name):
 
 # Функция для обработки списка имен из файла
 def greet_from_file(filename):
-    errors = []  # Собираем ошибки в список
-
     try:
         with open(filename, "r") as file:
             for line in file:
@@ -29,7 +26,9 @@ def greet_from_file(filename):
                     validate_name(name)
                     greet(name)
                 except ValidationError as e:
-                    errors.append(f"Invalid name '{name}': {e}")
+                    # Записываем ошибку сразу в файл
+                    with open("error.txt", "a") as error_file:
+                        error_file.write(f"Invalid name '{name}': {e}\n")
     except FileNotFoundError:
         sys.stderr.write(f"Error: File '{filename}' not found.\n")
         return
@@ -37,23 +36,8 @@ def greet_from_file(filename):
         sys.stderr.write(f"Error in greet_from_file: {e}\n")
         return
 
-    if errors:
-        with open("error.txt", "a") as error_file:
-            error_file.write("\n".join(errors) + "\n")
-        # Записываем ошибку в stderr, но не выводим её пользователю
-        sys.stderr.write(f"Errors were logged in 'error.txt'.\n")
-
 # Функция для интерактивного режима
 def interactive_greeting():
-    def signal_handler(sig, frame):
-        print("\nGoodbye!")
-        sys.exit(0)
-
-    signal.signal(signal.SIGINT, signal_handler)
-
-    # Отключаем вывод ошибок в консоль (stderr)
-    sys.stderr = open(os.devnull, 'w')
-
     while True:
         try:
             name = input("Please enter your name: ").strip()
@@ -61,11 +45,14 @@ def interactive_greeting():
                 validate_name(name)
                 greet(name)
             except ValidationError as e:
-                # Записываем ошибку в файл
+                # Записываем ошибку сразу в файл
                 with open("error.txt", "a") as error_file:
                     error_file.write(f"Invalid name '{name}': {e}\n")
-                # Ошибка записана в файл, но не выводится в консоль
                 continue  # Продолжаем цикл, чтобы запросить имя снова
+        except KeyboardInterrupt:
+            # Обработка прерывания через Ctrl+C
+            print("\nGoodbye!")
+            sys.exit(0)  # Завершаем программу
         except Exception as e:
             # Записываем все неожиданные ошибки в stderr для отладки
             sys.stderr.write(f"Unexpected error: {e}\n")
