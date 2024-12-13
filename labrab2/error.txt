@@ -1,0 +1,2 @@
+Invalid name 'alex': Name does not start with a capital letter.
+Invalid name 'M!na': Name contains invalid characters (only letters are allowed).
